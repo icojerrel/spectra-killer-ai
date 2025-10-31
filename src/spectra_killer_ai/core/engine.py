@@ -18,6 +18,7 @@ from .events import EventBus, Event, EventType, event_bus
 from ..data.sources.simulator import XAUUSDSimulator
 from ..strategies.technical.technical_analyzer import TechnicalAnalyzer
 from ..strategies.ml.cnn_trader import CNNTradingStrategy
+from ..integrations.moon_dev import MoonDevIntegration
 from ..utils.helpers import generate_id, format_currency
 from ..utils.metrics import calculate_return, calculate_sharpe_ratio, calculate_max_drawdown
 
@@ -59,6 +60,11 @@ class SpectraTradingEngine:
         self.cnn_strategy = None
         if self.config['ai'].get('enabled', False):
             self.cnn_strategy = CNNTradingStrategy(self.config['ai'])
+        
+        # Moon Dev integrations
+        self.moon_dev_integration = None
+        if self.config.get('moon_dev', {}).get('enabled', False):
+            self.moon_dev_integration = MoonDevIntegration(self.config['moon_dev'])
         
         # Engine state
         self.is_running = False
@@ -301,6 +307,31 @@ class SpectraTradingEngine:
                         'confidence': ai_signal['confidence'],
                         'entry_price': market_data[symbol],
                         'metadata': ai_signal
+                    })
+            
+            # Moon Dev swarm signals
+            if self.moon_dev_integration:
+                strategy_context = {
+                    'timeframe': self.config['trading']['timeframe'],
+                    'risk_tolerance': 'medium',
+                    'symbol': symbol
+                }
+                market_context = {
+                    'price': float(market_data[symbol]),
+                    'rsi': technical_analysis.get('traditional_analysis', {}).get('rsi', {}).get('value', 50) if technical_analysis else 50,
+                    'ema_short': technical_analysis.get('traditional_analysis', {}).get('ema', {}).get('short') if technical_analysis else None,
+                    'ema_long': technical_analysis.get('traditional_analysis', {}).get('ema', {}).get('long') if technical_analysis else None
+                }
+                
+                swarm_signal = await self.moon_dev_integration.get_enhanced_signal(market_context, strategy_context)
+                if swarm_signal['confidence'] >= self.config.get('moon_dev', {}).get('confidence_threshold', 0.6):
+                    signals.append({
+                        'source': 'moon_dev_swarm',
+                        'symbol': symbol,
+                        'signal': swarm_signal['signal'],
+                        'confidence': swarm_signal['confidence'],
+                        'entry_price': market_data[symbol],
+                        'metadata': swarm_signal
                     })
             
             # Combine signals if multiple

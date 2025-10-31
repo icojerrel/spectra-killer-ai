@@ -4,14 +4,17 @@
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Build](https://img.shields.io/badge/Build-Passing-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen)]()
+[![Integration](https://img.shields.io/badge/Integration-Moon_Dev_AI-purple)](https://github.com/moondevonyt/moon-dev-ai-agents)
 
-Een professioneel AI-gedreven trading systeem voor XAUUSD (Goud) met CNN deep learning, real-time monitoring, en geavanceerd risico management.
+Een professioneel AI-gedreven trading systeem voor XAUUSD (Goud) met CNN deep learning, **Moon Dev Swarm Intelligence**, RBI backtesting, en geavanceerd risico management.
 
 ## ✨ Key Features
 
 ### 🧠 **AI-Powered Trading**
 - **CNN Deep Learning** voor pattern recognition
-- **Hybrid Signal Generation** (AI + Technical Analysis)
+- **🤖 Moon Dev Swarm Intelligence** - Multi-model consensus (Claude + GPT + Gemini + DeepSeek)
+- **🧠 RBI Backtesting** - Automated strategy research and validation
+- **Hybrid Signal Generation** (CNN + Swarm + Technical Analysis)
 - **Real-time Model Training** en Optimalisatie
 - **Multi-timeframe Analysis** (1M - 1D)
 
