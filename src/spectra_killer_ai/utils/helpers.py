@@ -1,10 +1,15 @@
 """
-Helper utility functions
+Helper utility functions with security integrations
 """
 
 import uuid
 from decimal import Decimal
-from typing import Union
+from typing import Union, Tuple, Dict, List
+
+# Import security modules
+from ..security.credential_manager import get_credential_manager, secure_get_env
+from ..security.secure_logging import setup_secure_logging, log_security_event
+from ..security.validators import TradingValidator, ValidationError
 
 
 def format_currency(amount: Union[float, Decimal], currency: str = "$", decimals: int = 2) -> str:

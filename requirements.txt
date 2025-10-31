@@ -10,6 +10,9 @@ rich>=12.0.0
 # Async communication
 asyncio-mqtt>=0.13.0
 
+# Telegram integration
+python-telegram-bot>=20.0
+
 # Configuration management
 PyYAML>=6.0
 

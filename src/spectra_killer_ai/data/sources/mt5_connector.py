@@ -10,9 +10,7 @@ from typing import Dict, List, Optional, Union, Tuple
 import logging
 from enum import Enum
 
-# These would be imported when MT5 is available
-# import MetaTrader5 as mt5
-# from MetaTrader5 import *
+import MetaTrader5 as mt5
 
 logger = logging.getLogger(__name__)
 
@@ -79,31 +77,52 @@ class MT5Connector:
             True if connection successful
         """
         try:
-            # In a real implementation:
-            # if not mt5.initialize():
-            #     logger.error("MT5 initialization failed")
-            #     return False
+            # Initialize MT5
+            if not mt5.initialize():
+                logger.error("MT5 terminal not found or initialization failed")
+                if not mt5.terminal_info():
+                    logger.error("MT5 terminal is not running")
+                return False
             
-            # if not mt5.login(self.login, password=self.password, server=self.server):
-            #     logger.error("MT5 login failed")
-            #     return False
+            logger.info("MT5 initialized successfully")
             
-            # For placeholder, we'll simulate connection
-            logger.info("Simulating MT5 connection...")
+            # Get terminal info
+            terminal_info = mt5.terminal_info()
+            logger.info(f"MT5 Terminal: {terminal_info.name} v{terminal_info.version}")
             
-            # Simulate account info
+            # Login if credentials provided
+            if self.login and self.password and self.server:
+                if not mt5.login(login=self.login, password=self.password, server=self.server):
+                    logger.error(f"MT5 login failed for {self.login}@{self.server}")
+                    return False
+                logger.info(f"MT5 login successful: {self.login}@{self.server}")
+            else:
+                # Use existing connection
+                if not mt5.terminal_info().connected:
+                    logger.error("No active MT5 connection found")
+                    return False
+                logger.info("Using existing MT5 connection")
+            
+            # Get account info
+            account_info = mt5.account_info()
+            if account_info is None:
+                logger.error("Failed to get MT5 account info")
+                return False
+            
             self.account_info = {
-                'login': self.login or 'demo123456',
-                'server': self.server or 'Demo-Server',
-                'currency': 'USD',
-                'balance': 10000.0,
-                'equity': 10000.0,
-                'margin': 0.0,
-                'margin_free': 10000.0,
-                'margin_level': 0.0,
-                'leverage': 100,
-                'profit': 0.0,
-                'swap': 0.0,
+                'login': account_info.login,
+                'server': account_info.server,
+                'currency': account_info.currency,
+                'balance': account_info.balance,
+                'equity': account_info.equity,
+                'margin': account_info.margin,
+                'margin_free': account_info.margin_free,
+                'margin_level': account_info.margin_level,
+                'leverage': account_info.leverage,
+                'profit': account_info.profit,
+                'swap': account_info.swap,
+                'company': account_info.company,
+                'name': account_info.name,
             }
             
             self.connected = True

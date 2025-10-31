@@ -33,6 +33,12 @@ dependencies = [
     "typer>=0.9.0",
     "pydantic>=2.0.0",
     "httpx>=0.24.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+    "websockets>=11.0.0",
+    "cryptography>=41.0.0",
+    "PyJWT>=2.8.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -69,7 +75,7 @@ Repository = "https://github.com/spectra-killer-ai/spectra-killer-ai"
 Issues = "https://github.com/spectra-killer-ai/spectra-killer-ai/issues"
 
 [project.scripts]
-spectra-killer = "spectra_killer_ai.cli:app"
+spectra-killer = "spectra_killer_ai.interfaces.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]

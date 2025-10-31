@@ -16,11 +16,16 @@ from rich.live import Live
 import yaml
 
 from ..core.engine import SpectraTradingEngine
-from .analyzer import quick_analysis
+try:
+    from .analyzer import quick_analysis
+except ImportError:
+    # analyzer module not implemented yet
+    async def quick_analysis():
+        return {"error": "Analyzer not implemented"}
 
 app = typer.Typer(
     name="spectra-killer",
-    help="🚀 Spectra Killer AI - Advanced Trading System",
+    help="Spectra Killer AI - Advanced Trading System",
     no_args_is_help=True,
 )
 
@@ -36,7 +41,7 @@ def quick(
     timeframe: str = typer.Option("M5", "--timeframe", "-t", help="Timeframe"),
 ):
     """Quick market analysis"""
-    console.print("🔍 [bold blue]Quick Market Analysis[/bold blue]")
+    console.print("[bold blue]Quick Market Analysis[/bold blue]")
     console.print("=" * 50)
     
     with Progress(
@@ -51,14 +56,14 @@ def quick(
             progress.update(task, completed=True)
             
             if 'error' in result:
-                console.print(f"❌ [red]Error: {result['error']}[/red]")
+                console.print(f"[red]Error: {result['error']}[/red]")
                 raise typer.Exit(1)
             
             # Display analysis results
             _display_analysis_results(result)
             
         except Exception as e:
-            console.print(f"❌ [red]Analysis failed: {e}[/red]")
+            console.print(f"[red]Analysis failed: {e}[/red]")
             raise typer.Exit(1)
 
 
@@ -69,7 +74,7 @@ def paper_trade(
     symbol: str = typer.Option("XAUUSD", "--symbol", "-s", help="Trading symbol"),
 ):
     """Start paper trading"""
-    console.print("📊 [bold green]Paper Trading Mode[/bold green]")
+    console.print("[bold green]Paper Trading Mode[/bold green]")
     console.print("=" * 50)
     
     # Load configuration
@@ -139,27 +144,56 @@ def backtest(
 
 @app.command()
 def dashboard(
-    port: int = typer.Option(8080, "--port", "-p", help="Port for dashboard"),
+    port: int = typer.Option(8000, "--port", "-p", help="Port for dashboard"),
     host: str = typer.Option("localhost", "--host", help="Host for dashboard"),
+    launch_engine: bool = typer.Option(True, "--no-engine", help="Don't launch trading engine"),
 ):
     """Launch web dashboard"""
-    console.print("🌐 [bold purple]Web Dashboard[/bold purple]")
+    console.print("[bold purple]Web Dashboard[/bold purple]")
     console.print("=" * 50)
-    console.print(f"🚀 Starting dashboard on http://{host}:{port}")
-    console.print("💡 Press Ctrl+C to stop the dashboard")
+    console.print(f"Starting dashboard on http://{host}:{port}")
+    console.print("Press Ctrl+C to stop the dashboard")
     
     try:
-        # This would launch the actual web dashboard
-        console.print("📊 Dashboard features:")
-        console.print("   • Real-time P&L tracking")
-        console.print("   • Live signal monitoring")
-        console.print("   • Performance analytics")
-        console.print("   • Risk metrics dashboard")
-        console.print("")
-        console.print("⚠️ [yellow]Note: Web dashboard implementation pending[/yellow]")
+        # Import dashboard
+        from .dashboard.app import run_dashboard, create_dashboard_app
+        
+        if launch_engine:
+            # Create and start trading engine
+            config = _get_default_paper_config()
+            trading_engine = SpectraTradingEngine(config)
+            
+            # Start engine in background
+            import threading
+            import asyncio
+            
+            def run_engine():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(trading_engine.start())
+            
+            engine_thread = threading.Thread(target=run_engine)
+            engine_thread.daemon = True
+            engine_thread.start()
+            
+            # Wait a moment for engine to start
+            import time
+            time.sleep(2)
+            
+        else:
+            trading_engine = None
+        
+        # Launch dashboard
+        if launch_engine:
+            run_dashboard(trading_engine, host=host, port=port)
+        else:
+            run_dashboard(None, host=host, port=port)
         
     except KeyboardInterrupt:
-        console.print("\n⚠️ [yellow]Dashboard stopped[/yellow]")
+        console.print("\n[yellow]Dashboard stopped[/yellow]")
+    except Exception as e:
+        console.print(f"[red]Error starting dashboard: {e}[/red]")
+        raise typer.Exit(1)
 
 
 @app.command()

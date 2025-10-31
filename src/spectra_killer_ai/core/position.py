@@ -45,12 +45,12 @@ class Position:
     position_id: str
     symbol: str
     position_type: PositionType
-    status: PositionStatus = PositionStatus.OPEN
-    
-    # Entry details
     entry_price: Decimal
     quantity: Decimal
     entry_time: datetime = field(default_factory=datetime.now)
+    status: PositionStatus = PositionStatus.OPEN
+    
+    # Entry details
     
     # Risk management
     stop_loss: Optional[Decimal] = None

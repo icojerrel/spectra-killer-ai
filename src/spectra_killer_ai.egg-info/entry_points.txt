@@ -1,0 +1,2 @@
+[console_scripts]
+spectra-killer = spectra_killer_ai.interfaces.cli:app
