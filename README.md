@@ -36,6 +36,16 @@ Een professioneel AI-gedreven trading systeem voor XAUUSD (Goud) met CNN deep le
 - **Comprehensive Testing** (95%+ coverage)
 - **Production Ready** deployment
 
+### 📊 **NEW: NQ Stats Integration**
+- **Probability-Based Analysis** - 10-20 jaar historische data (2004-2025)
+- **Standard Deviation Levels** - Quantitative, math-derived entry/exit points
+- **Session Pattern Recognition** - Asian/London/New York relationships (73-98% edges)
+- **9am Hour Continuation** - 70% directional accuracy
+- **Initial Balance Breaks** - 74-81% breakout probability
+- **RTH Analysis** - 83.29% directional bias indicator
+- **Multi-Timeframe Confluence** - Combined probability scoring
+- **See [NQ Stats Guide](docs/NQ_STATS_COMPLETE_GUIDE.md) for complete methodology**
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -231,6 +241,8 @@ pytest
 - [API Documentation](docs/api.md)
 - [Strategy Development](docs/strategies.md)
 - [Deployment Guide](docs/deployment.md)
+- **[NQ Stats Complete Guide](docs/NQ_STATS_COMPLETE_GUIDE.md)** - Probability-based trading methodology
+- **[NQ Stats Integration](docs/NQ_STATS_INTEGRATION.md)** - How to use NQ Stats in your strategies
 
 ## 🚨 Risk Warning
 
