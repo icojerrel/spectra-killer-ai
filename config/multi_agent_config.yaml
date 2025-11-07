@@ -1,0 +1,261 @@
+# Multi-Agent NQ Stats Trading System Configuration
+# 8 Specialized Agents + Coordinator
+
+# ============================================================================
+# COORDINATOR SETTINGS
+# ============================================================================
+
+coordination_mode: "confluence_voting"
+# Options: "best_signal", "confluence_voting", "portfolio_diversification"
+
+min_confluence: 2              # Minimum agreeing agents to trade
+max_concurrent_positions: 3    # Max simultaneous agent positions
+
+# ============================================================================
+# NQ STATS ANALYZER (Shared by all agents)
+# ============================================================================
+
+nq_stats:
+  sdev_values:
+    daily: 1.376
+    hourly: 0.34
+    weekly: 2.1
+    monthly: 4.5
+
+  high_probability_threshold: 0.75
+  medium_probability_threshold: 0.51
+
+# ============================================================================
+# AGENT 1: SDEV MEAN REVERSION
+# Edge: 70-95% probability at extremes
+# Active: 24/7
+# ============================================================================
+
+agents:
+  sdev_agent:
+    enabled: true
+    min_probability: 0.70
+    position_size_pct: 0.10      # 10% of capital
+    min_sdev_distance: 1.5       # Activate at ±1.5σ
+
+    # Risk parameters
+    stop_loss_sdev: 2.0          # Stop at ±2.0σ
+    take_profit_sdev: 0.0        # Target = mean (session open)
+
+# ============================================================================
+# AGENT 2: HOUR SEGMENT RETRACEMENT
+# Edge: 89% retracement in first 20 minutes
+# Active: Minutes 0-20 of each hour (except 9am pre-open)
+# ============================================================================
+
+  hour_agent:
+    enabled: true
+    min_probability: 0.85        # Only trade high-probability setups
+    position_size_pct: 0.12      # 12% (higher due to edge)
+
+    # Time filters
+    avoid_9am_hour: true         # Skip 9:00-9:30am
+
+# ============================================================================
+# AGENT 3: RTH BREAK
+# Edge: 83.29% directional bias
+# Active: 9:30am-4:00pm (RTH hours)
+# ============================================================================
+
+  rth_agent:
+    enabled: true
+    min_probability: 0.80
+    position_size_pct: 0.15      # 15% (strong edge)
+
+    # Only trade strong scenarios
+    require_outside_prth: true   # Only when opened outside pRTH
+
+# ============================================================================
+# AGENT 4: 9AM HOUR CONTINUATION (STRONGEST EDGE!)
+# Edge: 70% NY session continuation
+# Active: After 10:00am
+# ============================================================================
+
+  9am_agent:
+    enabled: true
+    min_probability: 0.65        # Lower threshold (best edge)
+    position_size_pct: 0.20      # 20% (DOUBLE - strongest edge!)
+
+    # Aggressive settings due to high win rate
+    use_aggressive_targets: true
+
+# ============================================================================
+# AGENT 5: INITIAL BALANCE BREAKOUT
+# Edge: 74-81% directional break
+# Active: After 10:30am
+# ============================================================================
+
+  ib_agent:
+    enabled: true
+    min_probability: 0.72
+    position_size_pct: 0.13      # 13%
+
+    # IB specific
+    wait_for_ib_complete: true   # Only trade after 10:30am
+    use_ib_range_targets: true   # Target = IB range extension
+
+# ============================================================================
+# AGENT 6: NOON CURVE
+# Edge: 74.3% opposite extremes
+# Active: After 12:00pm
+# ============================================================================
+
+  noon_agent:
+    enabled: true
+    min_probability: 0.72
+    position_size_pct: 0.11      # 11%
+
+    # Noon specific
+    wait_for_noon: true          # Only trade after 12:00pm
+    require_clear_am_extreme: true
+
+# ============================================================================
+# AGENT 7: SESSION PATTERN (ALN)
+# Edge: 73-98% depending on pattern
+# Active: During NY session when pattern clear
+# ============================================================================
+
+  session_agent:
+    enabled: true
+    min_probability: 0.75
+    position_size_pct: 0.15      # 15% (can be high probability)
+
+    # Pattern filters
+    min_pattern_probability: 0.80  # Only trade best patterns
+    prefer_london_engulfs: true    # 98% edge pattern
+
+# ============================================================================
+# AGENT 8: MORNING JUDAS CONTINUATION
+# Edge: 64-70% continuation
+# Active: After 10:00am
+# ============================================================================
+
+  judas_agent:
+    enabled: true
+    min_probability: 0.64
+    position_size_pct: 0.10      # 10%
+
+    # Judas specific
+    only_trade_continuation: true  # Never fade the Judas!
+
+# ============================================================================
+# PORTFOLIO MANAGEMENT
+# ============================================================================
+
+portfolio:
+  total_capital: 10000           # Base capital
+  max_total_exposure: 0.50       # Max 50% of capital in positions
+  reserve_cash_pct: 0.20         # Keep 20% in reserve
+
+  # Position sizing
+  max_single_agent_size: 0.20    # Max 20% per agent
+  scale_with_confluence: true    # Increase size with agreement
+  confluence_multipliers:
+    1_agent: 1.0                 # Base size
+    2_agents: 1.25               # +25%
+    3_agents: 1.5                # +50%
+    4_plus_agents: 2.0           # +100% (max)
+
+# ============================================================================
+# RISK MANAGEMENT (Global)
+# ============================================================================
+
+risk_management:
+  max_daily_loss_pct: 0.03       # Stop trading if -3% daily
+  max_drawdown_pct: 0.10         # Stop if -10% from peak
+
+  # Stop loss settings
+  use_dynamic_stops: true        # Use SDEV-based stops
+  default_stop_pct: 0.015        # 1.5% stop if no SDEV available
+
+  # Take profit settings
+  use_dynamic_targets: true      # Use SDEV-based targets
+  default_target_pct: 0.02       # 2% target if no SDEV available
+
+# ============================================================================
+# MONITORING & LOGGING
+# ============================================================================
+
+monitoring:
+  log_level: "INFO"
+  log_all_signals: true
+  log_coordination_decisions: true
+
+  # Performance tracking
+  track_agent_performance: true
+  generate_daily_reports: true
+  alert_on_low_win_rate: true
+  min_acceptable_win_rate: 0.50  # Alert if <50%
+
+# ============================================================================
+# BACKTESTING
+# ============================================================================
+
+backtesting:
+  enabled: false
+  start_date: "2023-01-01"
+  end_date: "2025-01-01"
+  validate_all_agents: true
+
+# ============================================================================
+# ADVANCED SETTINGS
+# ============================================================================
+
+advanced:
+  # Agent activation
+  allow_simultaneous_agents: true     # Multiple agents can trade at once
+  max_simultaneous_agents: 3          # Limit for risk control
+
+  # Signal filtering
+  require_nq_stats_confirmation: true # Always validate with NQ Stats
+  filter_low_confidence: true         # Skip signals <60% confidence
+
+  # Dynamic adjustments
+  auto_adjust_thresholds: false       # Disable auto-tuning for now
+  recalibrate_weekly: false           # Disable auto-recalibration
+
+# ============================================================================
+# AGENT PRIORITY (When conflicts occur)
+# ============================================================================
+
+agent_priority:
+  # Higher number = higher priority
+  9am_agent: 10              # Highest (strongest edge)
+  rth_agent: 9
+  session_agent: 8
+  ib_agent: 7
+  sdev_agent: 6
+  noon_agent: 5
+  hour_agent: 4
+  judas_agent: 3
+
+# ============================================================================
+# NOTES
+# ============================================================================
+
+# Position Size Summary (when trading individually):
+# - 9am Agent: 20% (strongest edge)
+# - RTH Agent: 15%
+# - Session Agent: 15%
+# - IB Agent: 13%
+# - Hour Agent: 12%
+# - Noon Agent: 11%
+# - SDEV Agent: 10%
+# - Judas Agent: 10%
+
+# With confluence_voting mode and 3 agents agreeing:
+# - Combined size = base * 1.5 = up to 30% for high-confluence setups
+
+# Total theoretical max exposure (all 8 agents):
+# - 20+15+15+13+12+11+10+10 = 106%
+# - Limited by max_total_exposure = 50%
+# - And max_simultaneous_agents = 3
+
+# Example: 3 agents active (9am + RTH + IB):
+# - Individual: 20% + 15% + 13% = 48% (within limits)
+# - Confluence (if agree): 15% * 1.5 = 22.5% (well within limits)

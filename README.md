@@ -46,6 +46,16 @@ Een professioneel AI-gedreven trading systeem voor XAUUSD (Goud) met CNN deep le
 - **Multi-Timeframe Confluence** - Combined probability scoring
 - **See [NQ Stats Guide](docs/NQ_STATS_COMPLETE_GUIDE.md) for complete methodology**
 
+### 🤖 **NEW: Multi-Agent Trading System**
+- **8 Specialized Agents** - Each focusing on one NQ Stats methodology
+- **Agent Coordinator** - Orchestrates all agents with 3 coordination modes
+- **Confluence Voting** - Combines agreeing signals (1.5x-2x position scaling)
+- **Portfolio Diversification** - Trade multiple edges simultaneously
+- **Dynamic Position Sizing** - Scales with signal confluence (2-4+ agents)
+- **Independent Optimization** - Each agent tunes own parameters
+- **Risk Distribution** - Not dependent on single strategy
+- **See [Multi-Agent Guide](docs/MULTI_AGENT_SYSTEM_GUIDE.md) for complete system**
+
 ## 🚀 Quick Start
 
 ### Installation
